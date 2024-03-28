@@ -1,11 +1,15 @@
 ---
 title: Computational Tools for Macroeconometrics
 subtitle: "Assignment 1"
-format: html
+format: 
+  pdf:
+    fontsize: 10pt
+    geometry:
+      - top=30mm
+      - left=20mm
 engine: jupyter
 highlight-style: github
 code-block-bg: true
-code-block-border-left: "#31BAE9"
 code-line-numbers: true
 ---
 
@@ -231,10 +235,12 @@ y_{T}
 $$
 and
 $$
-\mathbf{X} = \begin{pmatrix}1 & Y_{p+1} & Y_{p} & \cdots & Y_{1} & X_{p+1,1} & X_{p,1} & \cdots & X_{1,1} & X_{p+1,k} & X_{p,k} & \cdots & X_{1,k}\\
-\vdots & \vdots & \vdots &  & \vdots & \vdots & \vdots &  & \vdots & \vdots & \vdots &  & \vdots\\
-1 & Y_{T-h-1} & Y_{T-h-2} & \cdots & Y_{T-h-p-1} & X_{T-h-1,1} & X_{T-h-2,1} & \cdots & X_{T-h-p-1,1} & X_{T-h-1,k} & X_{T-h-2,k} & \cdots & X_{T-h-p-1,k}\\
-1 & Y_{T-h} & Y_{T-h-1} & \cdots & Y_{T-h-p} & X_{T-h,1} & X_{T-h-1,1} & \cdots & X_{T-h-p,1} & X_{T-h,k} & X_{T-h-1,k} &  & X_{T-h-p,k}
+\setcounter{MaxMatrixCols}{20}
+\mathbf{X} = \begin{pmatrix}
+    1      & Y_{p+1}   & Y_{p}     & \cdots & Y_{1}       & X_{p+1,1}   & X_{p,1}     & \cdots & X_{1,1}       & \cdots & X_{p+1,k}   & X_{p,k}     & \cdots & X_{1,k}\\
+    \vdots & \vdots    & \vdots    &        & \vdots      & \vdots      & \vdots      &        & \vdots        & \cdots & \vdots      & \vdots      &        & \vdots \\
+    1      & Y_{T-h-1} & Y_{T-h-2} & \cdots & Y_{T-h-p-1} & X_{T-h-1,1} & X_{T-h-2,1} & \cdots & X_{T-h-p-1,1} & \cdots & X_{T-h-1,k} & X_{T-h-2,k} & \cdots & X_{T-h-p-1,k}\\
+    1      & Y_{T-h}   & Y_{T-h-1} & \cdots & Y_{T-h-p}   & X_{T-h,1}   & X_{T-h-1,1} & \cdots & X_{T-h-p,1}   & \cdots &X_{T-h,k}   & X_{T-h-1,k} & \cdots & X_{T-h-p,k} \\
 \end{pmatrix}.
 $$
 The size of $\mathbf{X}$ is $(T-p-h)\times 1+(1+k)(1+p)$ and that of $\mathbf{y}$ is $T-h-p$.
@@ -364,11 +370,15 @@ A sensible way to structure the code for real-time evaluation is
 to use several functions. For instance, you can define a function that calculates the forecast given the DataFrame.
 
 ```{python}
-def calculate_forecast(df_cleaned, p = 4, H = [1,4,8], end_date = '12/1/1999',target = 'INDPRO', xvars = ['CPIAUCSL', 'TB3MS']):
-
+def calculate_forecast(df_cleaned, 
+                       p = 4, 
+                       H = [1,4,8], 
+                       end_date = '12/1/1999',
+                       target = 'INDPRO', 
+                       xvars = ['CPIAUCSL', 'TB3MS']):
     ## Subset df_cleaned to use only data up to end_date
     rt_df = df_cleaned[df_cleaned['sasdate'] <= pd.Timestamp(end_date)]
-    ## Get the actual values of target at different steps ahead
+    ## Get the actual values of the target at different steps ahead
     Y_actual = []
     for h in H:
         os = pd.Timestamp(end_date) + pd.DateOffset(months=h)
@@ -391,7 +401,7 @@ def calculate_forecast(df_cleaned, p = 4, H = [1,4,8], end_date = '12/1/1999',ta
     ## Add a column on ones (for the intercept)
     X.insert(0, 'Ones', np.ones(len(X)))
     
-    ## Save last row of X (converted to numpy)
+    ## Save the last row of X (converted to a `numpy` array)
     X_T = X.iloc[-1:].values
 
     ## While the X will be the same, Y needs to be leaded differently
@@ -434,4 +444,4 @@ np.sqrt(edf.apply(np.square).mean())
 
 ```
 
-You may change the function `calculate_forecast` to output also the actual data end the forecast, so you can, for instance, construct a plot.
+You may change the function `calculate_forecast` to output the actual data and the forecast so you can, for instance, construct a plot.
